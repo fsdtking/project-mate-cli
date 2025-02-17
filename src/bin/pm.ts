@@ -12,6 +12,7 @@ import {
   getCurrentBranch
 } from '../lib/branch';
 import { listAndRunScript } from '../lib/script';
+import { searchProjects as searchLocalProjects } from '../lib/open';
 
 // 确保配置文件存在
 async function init() {
@@ -39,6 +40,18 @@ program
       await searchProjects(keyword, options?.git);
     } catch (error) {
       console.error(chalk.red('搜索失败：'), error);
+    }
+  });
+
+// 打开项目命令
+program
+  .command('open [keyword]')
+  .description('搜索并打开本地项目')
+  .action(async (keyword?: string) => {
+    try {
+      await searchLocalProjects(keyword || '');
+    } catch (error) {
+      console.error(chalk.red('打开项目失败：'), error);
     }
   });
 
