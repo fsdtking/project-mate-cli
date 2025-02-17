@@ -2,7 +2,7 @@
 
 import { program } from 'commander';
 import { searchProjects } from '../lib/search';
-import { setConfig, getConfig, getConfigValue, getConfigKeys } from '../lib/config';
+import { setConfig, getConfig, getConfigValue, getConfigKeys, ensureConfig } from '../lib/config';
 import { Config } from '../types';
 import chalk from 'chalk';
 import { 
@@ -11,18 +11,35 @@ import {
   searchBranches,
   getCurrentBranch
 } from '../lib/branch';
+import { listAndRunScript } from '../lib/script';
 
-program
-  .version('1.0.0')
-  .description('项目管理工具');
+// 确保配置文件存在
+async function init() {
+  try {
+    await ensureConfig();
+  } catch (error) {
+    console.error(chalk.red('初始化配置文件失败：'), error);
+    process.exit(1);
+  }
+}
+
+init();
 
 // 搜索命令
 program
-  .command('search <keyword>')
-  .option('-g, --git', '在远程Git仓库中搜索')
+  .command('search [keyword]')
   .description('搜索项目')
-  .action(async (keyword: string, options: { git?: boolean }) => {
-    await searchProjects(keyword, options);
+  .option('-g, --git', '在 GitLab 中搜索项目')
+  .action(async (keyword?: string, options?: { git?: boolean }) => {
+    if (!keyword) {
+      console.error(chalk.red('错误：必须提供搜索关键词'));
+      return;
+    }
+    try {
+      await searchProjects(keyword, options?.git);
+    } catch (error) {
+      console.error(chalk.red('搜索失败：'), error);
+    }
   });
 
 // 配置管理命令
@@ -35,14 +52,15 @@ program
       .description('设置配置项')
       .action(async (key: string, value: string) => {
         try {
-          const validKeys = getConfigKeys();
-          if (!validKeys.includes(key as any)) {
+          const validKeys = await getConfigKeys();
+          if (!validKeys.includes(key as keyof Config)) {
             console.error(chalk.red('错误：无效的配置项'));
             console.log(chalk.yellow('可用的配置项：'));
             validKeys.forEach(k => console.log(chalk.blue(`  - ${k}`)));
             return;
           }
           await setConfig(key as keyof Config, value);
+          console.log(chalk.green(`配置项 ${key} 已更新`));
         } catch (error) {
           console.error(chalk.red('设置配置失败：'), error);
         }
@@ -50,39 +68,33 @@ program
   )
   .addCommand(
     program
-      .command('get <key>')
-      .description('获取配置项的值')
-      .action(async (key: string) => {
+      .command('get [key]')
+      .description('获取配置项，不指定 key 时获取所有配置')
+      .action(async (key?: string) => {
         try {
-          const validKeys = getConfigKeys();
-          if (!validKeys.includes(key as any)) {
-            console.error(chalk.red('错误：无效的配置项'));
-            console.log(chalk.yellow('可用的配置项：'));
-            validKeys.forEach(k => console.log(chalk.blue(`  - ${k}`)));
-            return;
-          }
-          const value = await getConfigValue(key as keyof Config);
-          console.log(chalk.green(`${key}: ${value}`));
-        } catch (error) {
-          console.error(chalk.red('获取配置失败：'), error);
-        }
-      })
-  )
-  .addCommand(
-    program
-      .command('list')
-      .description('列出所有配置项')
-      .action(async () => {
-        try {
-          const config = await getConfig();
-          console.log(chalk.yellow('当前配置：'));
-          Object.entries(config).forEach(([key, value]) => {
-            if (key === 'gitlab-token') {
-              console.log(chalk.blue(`  ${key}: ${value ? '已设置' : '未设置'}`));
-            } else {
-              console.log(chalk.blue(`  ${key}: ${value}`));
+          if (key) {
+            const validKeys = await getConfigKeys();
+            if (!validKeys.includes(key as keyof Config)) {
+              console.error(chalk.red('错误：无效的配置项'));
+              console.log(chalk.yellow('可用的配置项：'));
+              validKeys.forEach(k => console.log(chalk.blue(`  - ${k}`)));
+              return;
             }
-          });
+            const value = await getConfigValue(key as keyof Config);
+            if (value) {
+              console.log(chalk.green(`${key}: ${value}`));
+            } else {
+              console.log(chalk.yellow(`未找到配置项：${key}`));
+              const keys = await getConfigKeys();
+              console.log(chalk.gray('可用的配置项：', keys.join(', ')));
+            }
+          } else {
+            const config = await getConfig();
+            console.log(chalk.green('当前配置：'));
+            Object.entries(config).forEach(([key, value]) => {
+              console.log(chalk.blue(`${key}: ${value}`));
+            });
+          }
         } catch (error) {
           console.error(chalk.red('获取配置失败：'), error);
         }
@@ -174,5 +186,17 @@ program
         }
       })
   );
+
+// 脚本运行命令
+program
+  .command('run')
+  .description('运行 package.json 中的脚本命令')
+  .action(async () => {
+    try {
+      await listAndRunScript();
+    } catch (error) {
+      console.error(chalk.red('运行脚本失败：'), error);
+    }
+  });
 
 program.parse(process.argv);

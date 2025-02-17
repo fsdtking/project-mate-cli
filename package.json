@@ -1,36 +1,36 @@
 {
   "name": "project-mate-cli",
   "version": "1.0.0",
-  "description": "一个用于快速查找和管理项目的命令行工具",
+  "description": "A CLI tool for project management",
   "main": "dist/bin/pm.js",
   "bin": {
-    "pm": "./dist/bin/pm.js"
+    "pm": "dist/bin/pm.js"
   },
   "scripts": {
     "build": "tsc",
     "start": "node dist/bin/pm.js",
-    "dev": "ts-node src/bin/pm.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node src/bin/pm.ts"
   },
   "keywords": [
     "cli",
     "project-management",
-    "git"
+    "git",
+    "gitlab"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "commander": "^11.0.0",
-    "simple-git": "^3.19.1",
+    "axios": "^1.6.7",
     "chalk": "^4.1.2",
-    "inquirer": "^8.2.5",
-    "glob": "^10.3.3",
-    "axios": "^1.6.0"
+    "commander": "^11.1.0",
+    "glob": "^10.3.10",
+    "inquirer": "^8.2.6",
+    "simple-git": "^3.22.0"
   },
   "devDependencies": {
-    "@types/inquirer": "^8.2.5",
-    "@types/node": "^20.8.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+    "@types/inquirer": "^8.2.10",
+    "@types/node": "^20.11.19",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }

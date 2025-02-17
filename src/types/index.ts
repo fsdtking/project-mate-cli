@@ -6,9 +6,10 @@ export interface Config {
 }
 
 export interface SearchMatch {
-  line: number;
-  content: string;
-  file: string;
+  path: string;
+  type: 'file' | 'directory';
+  line?: number;
+  content?: string;
 }
 
 export interface GitRepository {
@@ -16,6 +17,16 @@ export interface GitRepository {
   name: string;
   description: string;
   web_url: string;
-  ssh_url_to_repo: string;
   http_url_to_repo: string;
+}
+
+export type ProjectType = 'client' | 'server' | 'unknown';
+
+export interface PackageJson {
+  name?: string;
+  version?: string;
+  scripts?: Record<string, string>;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  projectType?: ProjectType;
 }
