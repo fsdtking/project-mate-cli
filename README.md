@@ -97,7 +97,27 @@ pm config get gitlab-token
 
 # 设置配置项
 pm config set local-project-root-directory "/path/to/projects"
+
+# 设置默认编辑器（交互式）
+pm config set editor
 ```
+
+支持的编辑器：
+- Visual Studio Code (默认)
+- IntelliJ IDEA
+- WebStorm
+- PyCharm
+- RustRover
+- GoLand
+- Windsurf
+- Cursor
+- Sublime Text
+- Atom
+
+注意：
+1. 执行 `pm config set editor` 命令时，只会列出已在本机安装的编辑器供选择。
+2. 默认优先使用 VSCode，如果未安装则使用 IDEA。
+3. 如果两者都未安装，会提示安装推荐的编辑器。
 
 ## 提示
 

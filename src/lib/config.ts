@@ -1,6 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { Config } from '../types';
+import chalk from 'chalk';
+import { selectEditor } from './editor';
 
 // 配置文件路径
 const CONFIG_PATH = path.join(__dirname, '../../pm_config.json');
@@ -10,7 +12,8 @@ const DEFAULT_CONFIG: Config = {
   'git-remote-address': 'https://github.com/',
   'local-project-root-directory': process.cwd(),
   'gitlab-token': '',
-  'gitlab-api-url': 'https://gitlab.com/api/v4'
+  'gitlab-api-url': 'https://gitlab.com/api/v4',
+  'editor': 'vscode'
 };
 
 // 确保配置文件存在
@@ -30,7 +33,7 @@ export async function getConfig(): Promise<Config> {
     const config = JSON.parse(configData);
     return { ...DEFAULT_CONFIG, ...config };
   } catch (error) {
-    console.error('读取配置文件失败：', error);
+    console.error(chalk.red('读取配置文件失败：'), error);
     return DEFAULT_CONFIG;
   }
 }
@@ -38,10 +41,18 @@ export async function getConfig(): Promise<Config> {
 // 设置配置项
 export async function setConfig(key: keyof Config, value: string): Promise<void> {
   try {
+    if (key === 'editor' && !value) {
+      // 如果是设置编辑器且没有提供值，则进入交互式选择
+      await selectEditor();
+      return;
+    }
+
     const config = await getConfig();
     config[key] = value;
     await fs.writeFile(CONFIG_PATH, JSON.stringify(config, null, 2));
+    console.log(chalk.green(`配置项 ${key} 已更新为 ${value}`));
   } catch (error) {
+    console.error(chalk.red('更新配置失败：'), error);
     throw error;
   }
 }
@@ -52,7 +63,7 @@ export async function getConfigValue(key: keyof Config): Promise<string> {
     const config = await getConfig();
     return config[key];
   } catch (error) {
-    console.error('获取配置项失败：', error);
+    console.error(chalk.red('获取配置项失败：'), error);
     return DEFAULT_CONFIG[key];
   }
 }

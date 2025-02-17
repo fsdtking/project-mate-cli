@@ -3,6 +3,7 @@ export interface Config {
   'local-project-root-directory': string;
   'gitlab-token': string;
   'gitlab-api-url': string;
+  'editor': string;
 }
 
 export interface SearchMatch {
@@ -23,10 +24,9 @@ export interface GitRepository {
 export type ProjectType = 'client' | 'server' | 'unknown';
 
 export interface PackageJson {
-  name?: string;
-  version?: string;
-  scripts?: Record<string, string>;
+  name: string;
+  version: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
-  projectType?: ProjectType;
+  scripts?: Record<string, string>;
 }

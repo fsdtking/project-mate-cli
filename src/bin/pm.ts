@@ -61,9 +61,9 @@ program
   .description('配置管理')
   .addCommand(
     program
-      .command('set <key> <value>')
+      .command('set <key> [value]')
       .description('设置配置项')
-      .action(async (key: string, value: string) => {
+      .action(async (key: string, value?: string) => {
         try {
           const validKeys = await getConfigKeys();
           if (!validKeys.includes(key as keyof Config)) {
@@ -72,7 +72,7 @@ program
             validKeys.forEach(k => console.log(chalk.blue(`  - ${k}`)));
             return;
           }
-          await setConfig(key as keyof Config, value);
+          await setConfig(key as keyof Config, value || '');
           console.log(chalk.green(`配置项 ${key} 已更新`));
         } catch (error) {
           console.error(chalk.red('设置配置失败：'), error);

@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import { exec } from 'child_process';
 import { getConfigValue } from './config';
+import { openWithEditor } from './editor';
 
 interface ProjectInfo {
   name: string;
@@ -127,14 +127,9 @@ export async function searchProjects(keyword: string): Promise<void> {
       }
     ]);
 
-    // 使用 Windsurf 打开项目
+    // 使用配置的编辑器打开项目
     console.log(chalk.blue(`\n正在打开项目：${selectedProject.name}`));
-    const command = `windsurf "${selectedProject.path}"`;
-    exec(command, (error) => {
-      if (error) {
-        console.error(chalk.red('打开项目失败：'), error);
-      }
-    });
+    await openWithEditor(selectedProject.path);
 
   } catch (error) {
     console.error(chalk.red('搜索项目失败：'), error);
