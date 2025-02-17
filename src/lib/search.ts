@@ -8,26 +8,27 @@ import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import os from 'os';
 import { Config, SearchMatch, GitRepository } from '../types';
 import { exec } from 'child_process';
+import { getConfig as getConfigFromFile } from './config';
 
 // 配置文件路径
 const CONFIG_PATH = path.join(__dirname, '../../pm_config.json');
 
-// 读取配置文件
-async function getConfig(): Promise<Config> {
-  try {
-    const configData = await fs.readFile(CONFIG_PATH, 'utf8');
-    return JSON.parse(configData);
-  } catch (error) {
-    console.error(chalk.red('读取配置文件失败：'), error);
-    // 返回默认配置
-    return {
-      'git-remote-address': 'https://github.com/',
-      'local-project-root-directory': process.cwd(),
-      'gitlab-token': '',
-      'gitlab-api-url': 'https://gitlab.com/api/v4'
-    };
-  }
-}
+// 删除旧的配置相关代码
+// async function getConfig(): Promise<Config> {
+//   try {
+//     const configData = await fs.readFile(CONFIG_PATH, 'utf8');
+//     return JSON.parse(configData);
+//   } catch (error) {
+//     console.error(chalk.red('读取配置文件失败：'), error);
+//     // 返回默认配置
+//     return {
+//       'git-remote-address': 'https://github.com/',
+//       'local-project-root-directory': process.cwd(),
+//       'gitlab-token': '',
+//       'gitlab-api-url': 'https://gitlab.com/api/v4'
+//     };
+//   }
+// }
 
 // 要排除的目录
 const EXCLUDED_DIRS: string[] = [
@@ -95,7 +96,7 @@ interface SearchResult {
 }
 
 async function searchLocalProjects(keyword: string): Promise<void> {
-  const config = await getConfig();
+  const config = await getConfigFromFile();
   const rootDir = config['local-project-root-directory'];
   const results: SearchMatch[] = [];
   let filesProcessed = 0;
@@ -207,7 +208,7 @@ async function searchGitProjects(keyword: string): Promise<void> {
   console.log(chalk.yellow('正在搜索远程仓库...'));
   
   try {
-    const config = await getConfig();
+    const config = await getConfigFromFile();
     
     if (!config['gitlab-token']) {
       console.error(chalk.red('错误: 未设置 GitLab Token'));
