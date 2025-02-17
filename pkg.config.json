@@ -1,0 +1,15 @@
+{
+  "name": "project-mate-cli",
+  "productName": "Project Mate CLI",
+  "version": "1.0.0",
+  "description": "A CLI tool for managing projects",
+  "bin": "dist/bin/pm.js",
+  "pkg": {
+    "targets": ["node16-macos-x64"],
+    "outputPath": "dist",
+    "assets": [
+      "dist/**/*",
+      "node_modules/**/*"
+    ]
+  }
+}

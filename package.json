@@ -1,35 +1,44 @@
 {
   "name": "project-mate-cli",
   "version": "1.0.0",
-  "description": "A CLI tool for project management",
+  "description": "A CLI tool for managing projects",
   "main": "dist/bin/pm.js",
   "bin": {
-    "pm": "dist/bin/pm.js"
+    "pm": "./dist/bin/pm.js"
   },
   "scripts": {
     "build": "tsc",
     "start": "node dist/bin/pm.js",
-    "dev": "ts-node src/bin/pm.ts"
+    "pkg": "pkg .",
+    "pack:mac": "pkg . --targets node16-macos-x64 --output dist/pm-mac"
   },
-  "keywords": [
-    "cli",
-    "project-management",
-    "git",
-    "gitlab"
-  ],
+  "pkg": {
+    "scripts": "dist/**/*.js",
+    "assets": [
+      "dist/**/*",
+      "node_modules/**/*"
+    ],
+    "targets": [
+      "node16-macos-x64"
+    ],
+    "outputPath": "dist"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.6.7",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
-    "glob": "^10.4.5",
+    "glob": "^10.3.10",
     "inquirer": "^8.2.6",
     "simple-git": "^3.22.0"
   },
   "devDependencies": {
     "@types/inquirer": "^8.2.10",
-    "@types/node": "^20.11.19",
+    "@types/node": "^20.11.17",
+    "electron": "latest",
+    "electron-builder": "latest",
+    "pkg": "latest",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
