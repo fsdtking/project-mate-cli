@@ -3,7 +3,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import { setConfig } from './config';
+import { setConfig, getConfig } from './config';
 
 const execAsync = promisify(exec);
 
@@ -29,56 +29,137 @@ const EDITORS: EditorConfig[] = [
   {
     name: 'webstorm',
     displayName: 'WebStorm',
-    paths: ['/Applications/WebStorm.app'],
+    paths: [
+      '/Applications/WebStorm.app',
+      '/Applications/JetBrains Toolbox/WebStorm.app',
+      '/Users/*/Applications/JetBrains Toolbox/apps/WebStorm/ch-0/*/*.app',
+      '/Users/*/Applications/WebStorm*.app'
+    ],
     command: 'webstorm'
   },
   {
     name: 'pycharm',
     displayName: 'PyCharm',
-    paths: ['/Applications/PyCharm.app'],
+    paths: [
+      '/Applications/PyCharm.app',
+      '/Applications/JetBrains Toolbox/PyCharm.app',
+      '/Users/*/Applications/JetBrains Toolbox/apps/PyCharm-P/ch-0/*/*.app',
+      '/Users/*/Applications/JetBrains Toolbox/apps/PyCharm-C/ch-0/*/*.app',
+      '/Users/*/Applications/PyCharm*.app'
+    ],
     command: 'pycharm'
   },
   {
     name: 'rustrover',
     displayName: 'RustRover',
-    paths: ['/Applications/RustRover.app'],
+    paths: [
+      '/Applications/RustRover.app',
+      '/Applications/JetBrains Toolbox/RustRover.app',
+      '/Users/*/Applications/JetBrains Toolbox/apps/RustRover/ch-0/*/*.app',
+      '/Users/*/Applications/RustRover*.app'
+    ],
     command: 'rustrover'
   },
   {
     name: 'idea',
     displayName: 'IntelliJ IDEA',
-    paths: ['/Applications/IntelliJ IDEA.app'],
+    paths: [
+      '/Applications/IntelliJ IDEA.app',
+      '/Applications/JetBrains Toolbox/IntelliJ IDEA.app',
+      '/Users/*/Applications/JetBrains Toolbox/apps/IDEA-U/ch-0/*/*.app',
+      '/Users/*/Applications/JetBrains Toolbox/apps/IDEA-C/ch-0/*/*.app',
+      '/Users/*/Applications/IntelliJ IDEA*.app'
+    ],
     command: 'idea'
   },
   {
     name: 'goland',
     displayName: 'GoLand',
-    paths: ['/Applications/GoLand.app'],
+    paths: [
+      '/Applications/GoLand.app',
+      '/Applications/JetBrains Toolbox/GoLand.app',
+      '/Users/*/Applications/JetBrains Toolbox/apps/GoLand/ch-0/*/*.app',
+      '/Users/*/Applications/GoLand*.app'
+    ],
     command: 'goland'
+  },
+  {
+    name: 'clion',
+    displayName: 'CLion',
+    paths: [
+      '/Applications/CLion.app',
+      '/Applications/JetBrains Toolbox/CLion.app',
+      '/Users/*/Applications/JetBrains Toolbox/apps/CLion/ch-0/*/*.app',
+      '/Users/*/Applications/CLion*.app'
+    ],
+    command: 'clion'
+  },
+  {
+    name: 'phpstorm',
+    displayName: 'PhpStorm',
+    paths: [
+      '/Applications/PhpStorm.app',
+      '/Applications/JetBrains Toolbox/PhpStorm.app',
+      '/Users/*/Applications/JetBrains Toolbox/apps/PhpStorm/ch-0/*/*.app',
+      '/Users/*/Applications/PhpStorm*.app'
+    ],
+    command: 'phpstorm'
+  },
+  {
+    name: 'datagrip',
+    displayName: 'DataGrip',
+    paths: [
+      '/Applications/DataGrip.app',
+      '/Applications/JetBrains Toolbox/DataGrip.app',
+      '/Users/*/Applications/JetBrains Toolbox/apps/DataGrip/ch-0/*/*.app',
+      '/Users/*/Applications/DataGrip*.app'
+    ],
+    command: 'datagrip'
   },
   {
     name: 'windsurf',
     displayName: 'Windsurf',
-    paths: ['/Applications/Windsurf.app'],
+    paths: [
+      '/Applications/Windsurf.app',
+      '/Users/*/Applications/Windsurf.app'
+    ],
     command: 'windsurf'
   },
   {
     name: 'cursor',
     displayName: 'Cursor',
-    paths: ['/Applications/Cursor.app'],
+    paths: [
+      '/Applications/Cursor.app',
+      '/Users/*/Applications/Cursor.app'
+    ],
     command: 'cursor'
   },
   {
     name: 'sublime',
     displayName: 'Sublime Text',
-    paths: ['/Applications/Sublime Text.app'],
+    paths: [
+      '/Applications/Sublime Text.app',
+      '/usr/local/bin/subl'
+    ],
     command: 'subl'
   },
   {
     name: 'atom',
     displayName: 'Atom',
-    paths: ['/Applications/Atom.app'],
+    paths: [
+      '/Applications/Atom.app',
+      '/usr/local/bin/atom'
+    ],
     command: 'atom'
+  },
+  {
+    name: 'nova',
+    displayName: 'Nova',
+    paths: [
+      '/Applications/Nova.app',
+      '/usr/local/bin/nova'
+    ],
+    command: 'nova'
   }
 ];
 
@@ -86,10 +167,20 @@ const EDITORS: EditorConfig[] = [
 async function isEditorInstalled(editor: EditorConfig): Promise<boolean> {
   try {
     // 检查应用程序是否存在
-    for (const path of editor.paths) {
+    for (const pathPattern of editor.paths) {
       try {
-        await fs.access(path);
-        return true;
+        if (pathPattern.includes('*')) {
+          // 如果路径包含通配符，使用 glob 模式匹配
+          const { glob } = await import('glob');
+          const matches = await glob(pathPattern);
+          if (matches.length > 0) {
+            return true;
+          }
+        } else {
+          // 直接检查具体路径
+          await fs.access(pathPattern);
+          return true;
+        }
       } catch {
         continue;
       }
@@ -149,21 +240,36 @@ export async function selectEditor(): Promise<void> {
 // 使用配置的编辑器打开项目
 export async function openWithEditor(projectPath: string): Promise<void> {
   try {
-    // 首先尝试使用 VSCode
-    if (await isEditorInstalled(EDITORS[0])) {
+    // 获取配置的编辑器
+    const config = await getConfig();
+    const configEditor = config.editor;
+    const editor = EDITORS.find(e => e.name === configEditor);
+    
+    if (!editor) {
+      throw new Error(`未找到编辑器配置：${configEditor}`);
+    }
+
+    // 检查编辑器是否已安装
+    if (await isEditorInstalled(editor)) {
+      exec(`${editor.command} "${projectPath}"`);
+      return;
+    }
+    
+    // 如果配置的编辑器不可用，尝试使用 VSCode
+    if (configEditor !== 'vscode' && await isEditorInstalled(EDITORS[0])) {
       exec(`code "${projectPath}"`);
       return;
     }
     
-    // 如果没有 VSCode，尝试使用 IDEA
-    if (await isEditorInstalled(EDITORS[4])) {
+    // 如果 VSCode 也不可用，尝试使用 IDEA
+    if (configEditor !== 'idea' && await isEditorInstalled(EDITORS[4])) {
       exec(`idea "${projectPath}"`);
       return;
     }
     
-    // 如果都没有，抛出错误
     throw new Error('未找到可用的编辑器');
   } catch (error) {
     console.error(chalk.red('打开项目失败：'), error);
+    throw error;
   }
 }
