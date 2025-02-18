@@ -10,7 +10,7 @@
     "build": "tsc && ncc build dist/bin/pm.js -o dist/ncc",
     "start": "node dist/bin/pm.js",
     "pkg": "pkg .",
-    "pack:mac": "pkg dist/ncc/index.js --targets node18-macos-x64 --output dist/pm-mac --debug && ./scripts/build-pkg.sh"
+    "pack:mac": "npm run build && pkg dist/ncc/index.js --targets node18-macos-x64 --output dist/pm-mac --debug && ./scripts/build-pkg.sh"
   },
   "pkg": {
     "scripts": "dist/**/*.js",
