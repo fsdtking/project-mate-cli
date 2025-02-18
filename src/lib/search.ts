@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import fs from 'fs/promises';
+import { Stats } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
@@ -99,10 +99,22 @@ const SEARCHABLE_EXTENSIONS = [
 // 进度显示
 function updateProgress(current: number, total: number, currentFile: string) {
   const percentage = Math.round((current / total) * 100);
+  const width = 30;
+  const filled = Math.round(width * (current / total));
+  const empty = width - filled;
+  const progressBar = `[${'='.repeat(filled)}${'-'.repeat(empty)}]`;
   const shortPath = currentFile.split('/').slice(-2).join('/');
-  process.stdout.write(
-    `\r${chalk.gray(`[${percentage}%] 已处理 ${current}/${total} 个文件`)} ${chalk.cyan(shortPath)}${' '.repeat(20)}`
-  );
+  
+  // Clear the current line
+  process.stdout.write('\r\x1b[K');
+  
+  // Write the new progress
+  const line = `${chalk.gray(progressBar)} ${chalk.yellow(`${percentage}%`)} ${chalk.gray(`已处理 ${current}/${total} 个文件`)} ${chalk.cyan(shortPath)}`;
+  process.stdout.write(line);
+  
+  if (current === total) {
+    process.stdout.write('\n');
+  }
 }
 
 // 搜索本地项目
@@ -211,126 +223,120 @@ export async function searchProjects(keyword: string, useGitLab: boolean = false
 async function searchFilesInDirectory(rootDir: string, keyword: string): Promise<SearchMatch[]> {
   const results: SearchMatch[] = [];
   let filesProcessed = 0;
-  let currentFile = '';
-
-  // 创建工作线程池
-  const numWorkers = Math.max(2, os.cpus().length - 1); // 至少使用2个线程
-  const workers: Worker[] = [];
-  const pendingResults: Promise<SearchMatch[]>[] = [];
-
-  console.log(chalk.gray(`使用 ${numWorkers} 个线程进行搜索...`));
-
-  // 获取所有文件
-  const files = await new Promise<string[]>((resolve, reject) => {
-    glob('**/*', {
-      cwd: rootDir,
-      ignore: [...EXCLUDED_DIRS.map(dir => `**/${dir}/**`), ...EXCLUDED_FILES],
-      nodir: true,
-      absolute: true,
-      follow: false  // 不跟踪符号链接
-    }).then(files => {
-      // 只保留可搜索的文件类型
-      const filteredFiles = files.filter(file => {
-        const ext = path.extname(file).toLowerCase();
-        return SEARCHABLE_EXTENSIONS.includes(ext);
-      });
-      resolve(filteredFiles);
-    }).catch(reject);
-  });
-
-  console.log(chalk.gray(`找到 ${files.length} 个文件待搜索`));
-
-  // 将文件分配给工作线程
-  const filesPerWorker = Math.ceil(files.length / numWorkers);
-  for (let i = 0; i < numWorkers; i++) {
-    const workerFiles = files.slice(i * filesPerWorker, (i + 1) * filesPerWorker);
-    const worker = new Worker(__filename, {
-      workerData: {
-        files: workerFiles,
-        keyword,
-        isWorker: true
-      }
-    });
-
-    workers.push(worker);
-    pendingResults.push(
-      new Promise<SearchMatch[]>((resolve, reject) => {
-        const workerResults: SearchMatch[] = [];
-        worker.on('message', (data: { match?: SearchMatch; currentFile?: string }) => {
-          if (data.match) {
-            workerResults.push(data.match);
-          }
-          if (data.currentFile) {
-            currentFile = data.currentFile;
-          }
-          filesProcessed++;
-          updateProgress(filesProcessed, files.length, currentFile);
-        });
-        worker.on('error', reject);
-        worker.on('exit', (code) => {
-          if (code === 0) resolve(workerResults);
-          else reject(new Error(`Worker stopped with exit code ${code}`));
-        });
-      })
-    );
-  }
 
   try {
-    const workerResults = await Promise.all(pendingResults);
-    results.push(...workerResults.flat());
-  } finally {
-    workers.forEach(worker => worker.terminate());
-  }
+    // 获取所有文件
+    const files = await new Promise<string[]>((resolve, reject) => {
+      glob('**/*', {
+        cwd: rootDir,
+        ignore: [...EXCLUDED_DIRS.map(dir => `**/${dir}/**`), ...EXCLUDED_FILES],
+        nodir: true,
+        absolute: true,
+        follow: false  // 不跟踪符号链接
+      }).then(files => {
+        // 只保留可搜索的文件类型
+        const filteredFiles = files.filter(file => {
+          const ext = path.extname(file).toLowerCase();
+          return SEARCHABLE_EXTENSIONS.includes(ext);
+        });
+        resolve(filteredFiles);
+      }).catch(reject);
+    });
 
-  return results;
+    const totalFiles = files.length;
+    console.log(chalk.gray(`找到 ${totalFiles} 个文件待搜索`));
+
+    // 批量处理文件
+    const batchSize = 5;
+    const batches = [];
+    for (let i = 0; i < files.length; i += batchSize) {
+      batches.push(files.slice(i, i + batchSize));
+    }
+
+    for (const batch of batches) {
+      const batchPromises = batch.map(async (file) => {
+        try {
+          const matches = await searchFile(file, keyword);
+          filesProcessed++;
+          updateProgress(filesProcessed, totalFiles, file);
+          return matches;
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.error(chalk.red(`\n处理文件 ${file} 时出错: ${errorMessage}`));
+          filesProcessed++;
+          updateProgress(filesProcessed, totalFiles, file);
+          return [];
+        }
+      });
+
+      const batchResults = await Promise.all(batchPromises);
+      results.push(...batchResults.flat());
+    }
+
+    return results;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(chalk.red('\n搜索过程中发生错误:', errorMessage));
+    return results;
+  }
 }
 
 // 搜索单个文件
-async function searchFile(filePath: string, keyword: string): Promise<SearchMatch[]> {
+export async function searchFile(filePath: string, keyword: string): Promise<SearchMatch[]> {
   const matches: SearchMatch[] = [];
+  let stat: Stats;
+
   try {
-    // 检查文件是否存在且可访问
     try {
-      const stat = await fs.stat(filePath);
-      if (!stat.isFile()) {
+      stat = await fs.stat(filePath);
+    } catch (error: any) {
+      if (error.code === 'ENOENT' || error.code === 'EACCES') {
         return matches;
       }
-    } catch (error) {
-      // 忽略文件不存在或无法访问的错误
-      if ((error as any).code === 'ENOENT') {
-        return matches;
-      }
-      throw error;
+      throw new Error(`无法访问文件 ${filePath}: ${error.message}`);
     }
 
-    // 检查文件大小
-    const stat = await fs.stat(filePath);
-    const MAX_FILE_SIZE = 1024 * 1024; // 1MB
-    if (stat.size > MAX_FILE_SIZE) {
+    // 如果不是文件或大小超过限制，直接返回
+    if (!stat.isFile() || stat.size > 1024 * 1024) {
       return matches;
     }
 
-    const content = await fs.readFile(filePath, 'utf8');
+    let content: string;
+    try {
+      content = await fs.readFile(filePath, 'utf8');
+    } catch (error: any) {
+      if (error.code === 'ENOENT' || error.code === 'EACCES') {
+        return matches;
+      }
+      throw new Error(`无法读取文件 ${filePath}: ${error.message}`);
+    }
+
+    // 使用更高效的字符串搜索
     const lines = content.split('\n');
+    const lowerKeyword = keyword.toLowerCase();
     
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].toLowerCase().includes(keyword.toLowerCase())) {
+      const line = lines[i];
+      if (line.toLowerCase().includes(lowerKeyword)) {
         matches.push({
           path: filePath,
           type: 'file',
           line: i + 1,
-          content: lines[i].trim()
+          content: line.trim()
         });
       }
     }
+
+    return matches;
   } catch (error) {
-    // 忽略特定类型的错误
-    const errorCode = (error as any).code;
-    if (!['EISDIR', 'ENOENT', 'EACCES'].includes(errorCode)) {
-      console.error(`Error reading file ${filePath}:`, error);
+    // 只记录非预期的错误
+    if (error instanceof Error) {
+      console.error(chalk.red(error.message));
+    } else {
+      console.error(chalk.red(`处理文件 ${filePath} 时发生未知错误`));
     }
+    return matches;
   }
-  return matches;
 }
 
 // 显示搜索结果
@@ -382,22 +388,25 @@ async function displaySearchResults(matches: SearchMatch[]): Promise<void> {
 // 工作线程处理函数
 async function workerProcess(files: string[], keyword: string): Promise<SearchMatch[]> {
   const results: SearchMatch[] = [];
+  const errors: string[] = [];
+
   for (const file of files) {
-    parentPort?.postMessage({ currentFile: file });
-    const matches = await searchFile(file, keyword);
-    matches.forEach(match => parentPort?.postMessage({ match }));
-    results.push(...matches);
+    try {
+      const matches = await searchFile(file, keyword);
+      results.push(...matches);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      errors.push(`处理文件 ${file} 时出错: ${errorMessage}`);
+    }
   }
+
+  if (errors.length > 0) {
+    console.error(chalk.red('搜索过程中发生以下错误:'));
+    errors.forEach(err => console.error(chalk.red(`- ${err}`)));
+    process.exitCode = 1;
+  }
+
   return results;
 }
 
-if (!isMainThread && workerData?.isWorker) {
-  const { files, keyword } = workerData;
-  workerProcess(files, keyword).then(results => {
-    results.forEach(result => parentPort?.postMessage(result));
-    process.exit(0);
-  }).catch(error => {
-    console.error('Worker error:', error);
-    process.exit(1);
-  });
-}
+// 移除工作线程入口点代码，因为我们现在使用异步函数替代

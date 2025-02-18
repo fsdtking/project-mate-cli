@@ -5,7 +5,17 @@ import chalk from 'chalk';
 import { selectEditor } from './editor';
 
 // 配置文件路径
-const CONFIG_PATH = path.join(__dirname, '../../pm_config.json');
+const CONFIG_DIR = path.join(process.env.HOME || process.env.USERPROFILE || '', '.pm-cli');
+const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
+
+// 确保配置目录存在
+async function ensureConfigDir() {
+  try {
+    await fs.access(CONFIG_DIR);
+  } catch {
+    await fs.mkdir(CONFIG_DIR, { recursive: true });
+  }
+}
 
 // 默认配置
 const DEFAULT_CONFIG: Config = {
@@ -19,10 +29,18 @@ const DEFAULT_CONFIG: Config = {
 // 确保配置文件存在
 export async function ensureConfig(): Promise<void> {
   try {
-    await fs.access(CONFIG_PATH);
-  } catch {
-    // 配置文件不存在，创建默认配置
-    await fs.writeFile(CONFIG_PATH, JSON.stringify(DEFAULT_CONFIG, null, 2));
+    // 首先确保配置目录存在
+    await ensureConfigDir();
+    
+    try {
+      await fs.access(CONFIG_PATH);
+    } catch {
+      // 配置文件不存在，创建默认配置
+      await fs.writeFile(CONFIG_PATH, JSON.stringify(DEFAULT_CONFIG, null, 2));
+    }
+  } catch (error) {
+    console.error(chalk.red('初始化配置文件失败：'), error);
+    throw error;
   }
 }
 
