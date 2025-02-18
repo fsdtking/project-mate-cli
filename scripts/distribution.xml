@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+    <title>Project Mate CLI</title>
+    <organization>com.project-mate-cli</organization>
+    <domains enable_localSystem="true"/>
+    <options customize="never" require-scripts="true" rootVolumeOnly="true" />
+    <!-- Define documents displayed at various steps -->
+    <welcome file="welcome.html" mime-type="text/html" />
+    <license file="license.html" mime-type="text/html" />
+    <conclusion file="conclusion.html" mime-type="text/html" />
+    <!-- List all component packages -->
+    <pkg-ref id="com.project-mate-cli"
+             version="1.0.0"
+             auth="root">component.pkg</pkg-ref>
+    <!-- List them again here. They can now be organized as a hierarchy -->
+    <choices-outline>
+        <line choice="com.project-mate-cli"/>
+    </choices-outline>
+    <!-- Define each choice above -->
+    <choice id="com.project-mate-cli"
+            visible="false"
+            title="Project Mate CLI"
+            description="Project Mate CLI 工具"
+            start_selected="true">
+      <pkg-ref id="com.project-mate-cli"/>
+    </choice>
+</installer-gui-script>

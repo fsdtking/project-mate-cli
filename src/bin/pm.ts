@@ -13,6 +13,7 @@ import {
 } from '../lib/branch';
 import { listAndRunScript } from '../lib/script';
 import { searchProjects as searchLocalProjects } from '../lib/open';
+import { installCLI } from '../install';
 
 // 确保配置文件存在
 async function init() {
@@ -24,7 +25,40 @@ async function init() {
   }
 }
 
-init();
+// 主函数
+async function main() {
+  // 检查是否是双击运行
+  const isDoubleClick = process.argv.length === 2;
+
+  if (isDoubleClick) {
+    console.log(chalk.blue('正在安装 project-mate-cli...'));
+    try {
+      await installCLI();
+      console.log(chalk.green('\n安装完成！'));
+      console.log(chalk.yellow('\n按任意键退出...'));
+      process.stdin.setRawMode(true);
+      process.stdin.resume();
+      process.stdin.on('data', () => process.exit(0));
+      return;
+    } catch (error) {
+      console.error(chalk.red('\n安装过程出错:'), error);
+      console.log(chalk.yellow('\n按任意键退出...'));
+      process.stdin.setRawMode(true);
+      process.stdin.resume();
+      process.stdin.on('data', () => process.exit(1));
+      return;
+    }
+  }
+
+  // 正常命令行模式
+  await init();
+}
+
+// 启动程序
+main().catch(error => {
+  console.error(chalk.red('程序执行出错:'), error);
+  process.exit(1);
+});
 
 // 搜索命令
 program

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# 创建必要的目录
+mkdir -p /usr/local/bin
+mkdir -p /usr/local/lib/project-mate-cli
+
+exit 0

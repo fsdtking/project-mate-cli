@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# 设置执行权限
+chmod 755 /usr/local/lib/project-mate-cli/pm
+chmod 755 /usr/local/bin/pm
+
+# 创建软链接
+ln -sf /usr/local/lib/project-mate-cli/pm /usr/local/bin/pm
+
+# 添加到 PATH（对所有用户生效）
+PATHS_FILE="/etc/paths.d/project-mate-cli"
+echo "/usr/local/bin" > "$PATHS_FILE"
+
+exit 0
