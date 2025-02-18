@@ -7,16 +7,15 @@
     "pm": "./dist/bin/pm.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && ncc build dist/bin/pm.js -o dist/ncc",
     "start": "node dist/bin/pm.js",
     "pkg": "pkg .",
-    "pack:mac": "pkg . --targets node16-macos-x64 --output dist/pm-mac"
+    "pack:mac": "pkg dist/ncc/index.js --targets node16-macos-x64 --output dist/pm-mac --debug"
   },
   "pkg": {
     "scripts": "dist/**/*.js",
     "assets": [
-      "dist/**/*",
-      "node_modules/**/*"
+      "dist/**/*"
     ],
     "targets": [
       "node16-macos-x64"
@@ -25,8 +24,15 @@
   },
   "author": "",
   "license": "ISC",
+  "resolutions": {
+    "@isaacs/cliui": "7.0.4",
+    "string-width": "4.2.3",
+    "strip-ansi": "6.0.1",
+    "ansi-regex": "5.0.1",
+    "wrap-ansi": "7.0.0"
+  },
   "dependencies": {
-    "axios": "^1.6.7",
+    "axios": "^0.27.2",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "glob": "^10.3.10",
@@ -36,7 +42,7 @@
   "devDependencies": {
     "@types/inquirer": "^8.2.10",
     "@types/node": "^20.11.17",
-    "electron": "latest",
+    "@vercel/ncc": "^0.38.3",
     "electron-builder": "latest",
     "pkg": "latest",
     "ts-node": "^10.9.2",
