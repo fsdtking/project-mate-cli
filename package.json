@@ -10,7 +10,7 @@
     "build": "tsc && ncc build dist/bin/pm.js -o dist/ncc",
     "start": "node dist/bin/pm.js",
     "pkg": "pkg .",
-    "pack:mac": "pkg dist/ncc/index.js --targets node16-macos-x64 --output dist/pm-mac --debug && ./scripts/build-pkg.sh"
+    "pack:mac": "pkg dist/ncc/index.js --targets node18-macos-x64 --output dist/pm-mac --debug && ./scripts/build-pkg.sh"
   },
   "pkg": {
     "scripts": "dist/**/*.js",
@@ -18,7 +18,7 @@
       "dist/**/*"
     ],
     "targets": [
-      "node16-macos-x64"
+      "node18-macos-x64"
     ],
     "outputPath": "dist"
   },
@@ -37,6 +37,7 @@
     "commander": "^11.1.0",
     "glob": "^10.3.10",
     "inquirer": "^8.2.6",
+    "ora": "^8.2.0",
     "simple-git": "^3.22.0"
   },
   "devDependencies": {

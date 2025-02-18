@@ -207,27 +207,7 @@ program
       .description('搜索所有本地仓库的分支')
       .action(async (keyword: string) => {
         try {
-          console.log(chalk.yellow(`正在搜索包含 "${keyword}" 的分支...`));
-          const results = await searchBranches(keyword);
-          
-          if (results.length === 0) {
-            console.log(chalk.yellow('未找到匹配的分支'));
-            return;
-          }
-
-          console.log(chalk.yellow('\n搜索结果：'));
-          results.forEach(({ repo, branches }) => {
-            console.log(chalk.blue(`\n仓库: ${repo}`));
-            branches.forEach(({ branch, description, matched }) => {
-              const matchType = matched === 'both' ? '分支名和备注' : 
-                              matched === 'name' ? '分支名' : '备注';
-              console.log(chalk.green(`  ${branch}`));
-              if (description) {
-                console.log(chalk.gray(`    备注: ${description}`));
-              }
-              console.log(chalk.gray(`    匹配: ${matchType}`));
-            });
-          });
+          await searchBranches(keyword);
         } catch (error) {
           console.error(chalk.red('搜索分支失败：'), error);
         }
