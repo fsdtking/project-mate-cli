@@ -1,6 +1,6 @@
 {
   "name": "project-mate-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A CLI tool for managing projects",
   "main": "dist/bin/pm.js",
   "bin": {
