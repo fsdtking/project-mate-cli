@@ -219,10 +219,37 @@ export async function searchProjects(keyword: string, useGitLab: boolean = false
   }
 }
 
+// 文件大小和超时配置
+const FILE_SIZE_LIMIT = 10 * 1024 * 1024; // 10MB
+const SEARCH_TIMEOUT = 5 * 60 * 1000;     // 5分钟
+
 // 搜索目录中的文件
 async function searchFilesInDirectory(rootDir: string, keyword: string): Promise<SearchMatch[]> {
   const results: SearchMatch[] = [];
   let filesProcessed = 0;
+  let totalSize = 0;
+  let startTime = Date.now();  // 改用 let 声明
+
+  // 创建一个用于检查超时的函数
+  const checkTimeout = async (): Promise<boolean> => {
+    const currentTime = Date.now();
+    if (currentTime - startTime > SEARCH_TIMEOUT) {
+      const { continueSearch } = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'continueSearch',
+        message: '搜索已经超过5分钟，是否继续搜索？',
+        default: false
+      }]);
+      
+      if (!continueSearch) {
+        console.log(chalk.yellow('\n搜索已取消'));
+        return true;
+      }
+      // 重置计时器
+      startTime = Date.now();
+    }
+    return false;
+  };
 
   try {
     // 获取所有文件
@@ -254,8 +281,24 @@ async function searchFilesInDirectory(rootDir: string, keyword: string): Promise
     }
 
     for (const batch of batches) {
+      // 检查是否超时
+      if (await checkTimeout()) {
+        break;
+      }
+
       const batchPromises = batch.map(async (file) => {
         try {
+          const stat = await fs.stat(file);
+          
+          // 检查文件大小
+          if (stat.size > FILE_SIZE_LIMIT) {
+            console.log(chalk.yellow(`\n跳过大文件：${file} (${(stat.size / 1024 / 1024).toFixed(2)}MB)`));
+            filesProcessed++;
+            updateProgress(filesProcessed, totalFiles, file);
+            return [];
+          }
+
+          totalSize += stat.size;
           const matches = await searchFile(file, keyword);
           filesProcessed++;
           updateProgress(filesProcessed, totalFiles, file);
@@ -273,6 +316,12 @@ async function searchFilesInDirectory(rootDir: string, keyword: string): Promise
       results.push(...batchResults.flat());
     }
 
+    // 显示搜索统计信息
+    const endTime = Date.now();
+    const duration = ((endTime - startTime) / 1000).toFixed(2);
+    const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
+    console.log(chalk.gray(`\n搜索完成：处理了 ${filesProcessed} 个文件，总大小 ${totalSizeMB}MB，用时 ${duration} 秒`));
+
     return results;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -282,25 +331,10 @@ async function searchFilesInDirectory(rootDir: string, keyword: string): Promise
 }
 
 // 搜索单个文件
-export async function searchFile(filePath: string, keyword: string): Promise<SearchMatch[]> {
+async function searchFile(filePath: string, keyword: string): Promise<SearchMatch[]> {
   const matches: SearchMatch[] = [];
-  let stat: Stats;
 
   try {
-    try {
-      stat = await fs.stat(filePath);
-    } catch (error: any) {
-      if (error.code === 'ENOENT' || error.code === 'EACCES') {
-        return matches;
-      }
-      throw new Error(`无法访问文件 ${filePath}: ${error.message}`);
-    }
-
-    // 如果不是文件或大小超过限制，直接返回
-    if (!stat.isFile() || stat.size > 1024 * 1024) {
-      return matches;
-    }
-
     let content: string;
     try {
       content = await fs.readFile(filePath, 'utf8');
