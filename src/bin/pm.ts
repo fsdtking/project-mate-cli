@@ -14,6 +14,7 @@ import {
 import { listAndRunScript } from '../lib/script';
 import { searchProjects as searchLocalProjects } from '../lib/open';
 import { installCLI } from '../install';
+import { version } from '../../package.json';
 
 // 确保配置文件存在
 async function init() {
@@ -64,7 +65,7 @@ main().catch(error => {
 program
   .name('pm')
   .description('Project Mate CLI - 项目管理工具\n\n更多详细帮助信息:\n  pm search --help    查看搜索命令详细用法\n  pm open --help      查看打开项目命令详细用法\n  pm config --help    查看配置管理命令详细用法\n  pm br --help       查看分支管理命令详细用法\n  pm run --help      查看运行脚本命令详细用法')
-  .version('1.0.0');
+  .version(version);
 
 // 搜索命令
 program
