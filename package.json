@@ -2,6 +2,7 @@
   "name": "project-mate-cli",
   "version": "1.0.1",
   "description": "A CLI tool for managing projects",
+  "license": "MIT",
   "main": "dist/bin/pm.js",
   "bin": {
     "pm": "./dist/bin/pm.js"
