@@ -1,109 +1,114 @@
 # Project Mate CLI
 
-一个强大的项目管理命令行工具，帮助你快速搜索、打开和管理本地和远程项目。
+English | [简体中文](./README.zh-CN.md)
 
-## 特性
+A powerful command-line tool designed to help you quickly search, open, and manage both local and remote projects.
 
-- 🔍 搜索项目：支持本地和 GitLab 项目搜索
-- 📂 打开项目：快速搜索并打开本地项目
-- 🔄 运行脚本：交互式运行项目中的 npm 脚本
-- 🌿 分支管理：为分支添加备注，方便记录和查找
-- ⚙️ 配置管理：灵活的配置项管理
+## Features
 
-## 安装
+- 🔍 Project Search: Support for both local and GitLab project search
+- 📂 Project Opening: Quickly search and open local projects
+- 🔄 Script Execution: Interactive running of npm scripts within projects
+- 🌿 Branch Management: Add notes to branches for easy tracking and finding
+- ⚙️ Configuration Management: Flexible configuration options
+
+## Installation
 
 ```bash
 npm install -g project-mate-cli
 ```
 
-## 配置
+## Configuration
 
-首次使用时，需要设置必要的配置项：
+First-time setup requires configuring essential settings:
 
 ```bash
-# 设置本地项目根目录
+# Set local project root directory
 pm config set local-project-root-directory "/path/to/your/projects"
 
-# 设置 GitLab 相关配置（如果需要使用 GitLab 功能）
+# Set GitLab configuration (if using GitLab features)
 pm config set gitlab-token "your-gitlab-token"
 pm config set gitlab-api-url "your-gitlab-api-url"
 ```
 
-## 使用方法
+## Usage
 
-### 打开项目
+### Opening Projects
 
 ```bash
-# 列出并打开本地项目
+# List and open local projects
 pm open
 
-# 搜索并打开特定项目
+# Search and open specific project
 pm open project-name
 ```
 
-### 搜索项目
+### Searching Projects
 
 ```bash
-# 搜索本地项目
+# Search local projects
 pm search keyword
 
-# 搜索 GitLab 项目
+# Search GitLab projects
 pm search keyword -g
 ```
 
-### 运行脚本
+## License
+
+This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
+### Running Scripts
 
 ```bash
-# 列出并运行项目中的 npm 脚本
+# List and run npm scripts in the project
 pm run
 ```
 
-脚本运行功能会自动检测项目类型（客户端/服务端），并为不同类型的命令添加特殊标记：
+The script execution feature automatically detects the project type (client/server) and adds special markers for different types of commands:
 
-- 客户端项目：
-  - 🚀 开发服务器 (dev, serve)
-  - 📦 构建命令 (build)
-  - 🧪 测试命令 (test)
+- Client Projects:
+  - 🚀 Development Server (dev, serve)
+  - 📦 Build Commands (build)
+  - 🧪 Test Commands (test)
 
-- 服务端项目：
-  - 🚀 启动服务器 (start)
-  - 🔄 数据库迁移 (migrate)
-  - 🌱 数据库填充 (seed)
+- Server Projects:
+  - 🚀 Start Server (start)
+  - 🔄 Database Migration (migrate)
+  - 🌱 Database Seeding (seed)
 
-### 分支管理
+### Branch Management
 
 ```bash
-# 为当前分支添加备注
-pm br set "这是一个新功能分支"
+# Add note to current branch
+pm br set "This is a new feature branch"
 
-# 为指定分支添加备注
-pm br set feature/new-feature "这是一个新功能分支"
+# Add note to specific branch
+pm br set feature/new-feature "This is a new feature branch"
 
-# 列出所有带备注的分支
+# List all branches with notes
 pm br list
 
-# 搜索分支
+# Search branches
 pm br search keyword
 ```
 
-### 配置管理
+### Configuration Management
 
 ```bash
-# 查看所有配置
+# View all configurations
 pm config get
 
-# 查看特定配置项
+# View specific configuration
 pm config get gitlab-token
 
-# 设置配置项
+# Set configuration
 pm config set local-project-root-directory "/path/to/projects"
 
-# 设置默认编辑器（交互式）
+# Set default editor (interactive)
 pm config set editor
 ```
 
-支持的编辑器：
-- Visual Studio Code (默认)
+Supported Editors:
+- Visual Studio Code (default)
 - IntelliJ IDEA
 - WebStorm
 - PyCharm
@@ -114,20 +119,20 @@ pm config set editor
 - Sublime Text
 - Atom
 
-注意：
-1. 执行 `pm config set editor` 命令时，只会列出已在本机安装的编辑器供选择。
-2. 默认优先使用 VSCode，如果未安装则使用 IDEA。
-3. 如果两者都未安装，会提示安装推荐的编辑器。
+Notes:
+1. When running `pm config set editor`, only editors installed on your machine will be listed.
+2. VSCode is used by default, falling back to IDEA if not installed.
+3. If neither is installed, you'll be prompted to install recommended editors.
 
-## 提示
+## Tips
 
-1. 使用 `pm open` 命令时，只会搜索配置的本地项目根目录下的一级目录。
-2. 项目类型（客户端/服务端）是根据项目依赖自动检测的。
-3. 分支备注功能需要在 Git 仓库目录下使用。
-4. 运行脚本功能需要项目中包含 package.json 文件。
+1. The `pm open` command only searches first-level directories under the configured local project root directory.
+2. Project type (client/server) is automatically detected based on project dependencies.
+3. Branch note features require being in a Git repository directory.
+4. Script running features require a package.json file in the project.
 
-## 常见问题
+## Common Issues
 
-1. 如果无法打开项目，请确保已正确安装并配置了 Windsurf。
-2. 如果无法搜索 GitLab 项目，请检查 GitLab Token 和 API URL 配置是否正确。
-3. 如果项目类型检测不准确，可以在项目的 package.json 中添加 "projectType" 字段手动指定。
+1. If you can't open projects, ensure Windsurf is properly installed and configured.
+2. If you can't search GitLab projects, check if your GitLab Token and API URL configurations are correct.
+3. If project type detection is inaccurate, you can manually specify it by adding a "projectType" field in the project's package.json.
