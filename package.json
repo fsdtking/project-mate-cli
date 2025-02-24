@@ -24,7 +24,6 @@
     "outputPath": "dist"
   },
   "author": "",
-  "license": "ISC",
   "resolutions": {
     "@isaacs/cliui": "7.0.4",
     "string-width": "4.2.3",
