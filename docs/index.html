@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Mate CLI - 高效的项目管理工具</title>
+    <title>Project Mate CLI</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
@@ -13,48 +13,61 @@
         <nav class="nav-container">
             <a href="#" class="logo">PM CLI</a>
             <div class="nav-links">
-                <a href="#features">特性</a>
-                <a href="#installation">安装</a>
-                <a href="#usage">使用</a>
+                <div class="lang-switcher">
+                    <button class="lang-btn" data-lang="zh">中文</button>
+                    <button class="lang-btn" data-lang="en">English</button>
+                </div>
+                <a href="#features" data-i18n="features"><span>特性</span></a>
+                <a href="#installation" data-i18n="installation"><span>安装</span></a>
+                <a href="#usage" data-i18n="usage"><span>使用</span></a>
                 <a href="https://github.com/fsdtking/project-mate-cli" target="_blank">GitHub</a>
             </div>
         </nav>
     </header>
 
     <section class="hero">
+        <div class="meteor-container"></div>
         <div class="hero-container">
-            <h1 class="hero-title">Project Mate CLI</h1>
-            <p class="hero-subtitle">高效的项目管理命令行工具</p>
+            <h1 class="hero-title" data-i18n="heroTitle">Project Mate CLI</h1>
+            <p class="hero-subtitle" data-i18n="heroSubtitle"><span class="char">高</span><span class="char">效</span><span class="char">的</span><span class="char">项</span><span class="char">目</span><span class="char">管</span><span class="char">理</span><span class="char">命</span><span class="char">令</span><span class="char">行</span><span class="char">工</span><span class="char">具</span></p>
             <div class="code-block">
-                <code>npm install -g project-mate-cli</code>
-                <button class="copy-btn">Copy</button>
+                <span class="typing-text">npm install -g project-mate-cli</span>
+                <button class="copy-btn" title="Copy to clipboard"></button>
             </div>
         </div>
     </section>
 
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title">核心特性</h2>
+            <h2 class="section-title" data-i18n="coreFeatures">核心特性</h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <i class="fas fa-rocket feature-icon"></i>
-                    <h3>快速项目初始化</h3>
-                    <p>一键创建标准化的项目结构，快速开始开发</p>
+                    <div class="feature-content">
+                        <h3 data-i18n="quickInit">快速项目初始化</h3>
+                        <p data-i18n="quickInitDesc">一键创建标准化的项目结构，快速开始开发</p>
+                    </div>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-box feature-icon"></i>
-                    <h3>依赖管理</h3>
-                    <p>智能管理项目依赖，自动处理版本冲突</p>
+                    <div class="feature-content">
+                        <h3 data-i18n="depManagement">依赖管理</h3>
+                        <p data-i18n="depManagementDesc">智能管理项目依赖，自动处理版本冲突</p>
+                    </div>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-code-branch feature-icon"></i>
-                    <h3>Git 操作自动化</h3>
-                    <p>简化 Git 工作流程，提高团队协作效率</p>
+                    <div class="feature-content">
+                        <h3 data-i18n="gitAutomation">Git 操作自动化</h3>
+                        <p data-i18n="gitAutomationDesc">简化 Git 工作流程，提高团队协作效率</p>
+                    </div>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-cogs feature-icon"></i>
-                    <h3>配置管理</h3>
-                    <p>灵活的项目配置管理，支持多环境部署</p>
+                    <div class="feature-content">
+                        <h3 data-i18n="configManagement">配置管理</h3>
+                        <p data-i18n="configManagementDesc">灵活的项目配置管理，支持多环境部署</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -62,44 +75,44 @@
 
     <section id="installation" class="installation">
         <div class="container">
-            <h2 class="section-title">安装指南</h2>
+            <h2 class="section-title" data-i18n="installGuide">安装指南</h2>
             <div class="code-block">
-                <code>npm install -g project-mate-cli</code>
-                <button class="copy-btn">Copy</button>
+                <span class="typing-text">npm install -g project-mate-cli</span>
+                <button class="copy-btn" title="Copy to clipboard"></button>
             </div>
             <div class="code-block">
-                <code>npx project-mate-cli [command]</code>
-                <button class="copy-btn">Copy</button>
+                <span class="typing-text">npx project-mate-cli [command]</span>
+                <button class="copy-btn" title="Copy to clipboard"></button>
             </div>
         </div>
     </section>
 
     <section id="usage" class="usage">
         <div class="container">
-            <h2 class="section-title">使用方法</h2>
+            <h2 class="section-title" data-i18n="usageGuide">使用方法</h2>
             <div class="command-grid">
                 <div class="command-card">
                     <h3 class="command-name">pm init</h3>
-                    <p>初始化新项目</p>
+                    <p data-i18n="initProject">初始化新项目</p>
                     <div class="code-block">
-                        <code>pm init my-project</code>
-                        <button class="copy-btn">Copy</button>
+                        <span class="typing-text">pm init my-project</span>
+                        <button class="copy-btn" title="Copy to clipboard"></button>
                     </div>
                 </div>
                 <div class="command-card">
                     <h3 class="command-name">pm config</h3>
-                    <p>管理项目配置</p>
+                    <p data-i18n="manageConfig">管理项目配置</p>
                     <div class="code-block">
-                        <code>pm config set key value</code>
-                        <button class="copy-btn">Copy</button>
+                        <span class="typing-text">pm config set key value</span>
+                        <button class="copy-btn" title="Copy to clipboard"></button>
                     </div>
                 </div>
                 <div class="command-card">
                     <h3 class="command-name">pm git</h3>
-                    <p>Git 操作助手</p>
+                    <p data-i18n="gitHelper">Git 操作助手</p>
                     <div class="code-block">
-                        <code>pm git sync</code>
-                        <button class="copy-btn">Copy</button>
+                        <span class="typing-text">pm git sync</span>
+                        <button class="copy-btn" title="Copy to clipboard"></button>
                     </div>
                 </div>
             </div>
@@ -107,12 +120,15 @@
     </section>
 
     <footer>
-        <p>Made with ❤️ by Project Mate Team</p>
+        <p data-i18n="madeWith">Made with ❤️ by Project Mate Team</p>
         <a href="https://github.com/fsdtking/project-mate-cli" class="github-link" target="_blank">
             <i class="fab fa-github"></i> GitHub
         </a>
     </footer>
 
+    <script src="js/i18n.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/meteor.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
