@@ -37,24 +37,29 @@
             <h2 class="section-title">核心特性</h2>
             <div class="features-grid">
                 <div class="feature-card">
-                    <i class="fas fa-rocket feature-icon"></i>
-                    <h3>快速项目初始化</h3>
-                    <p>一键创建标准化的项目结构，快速开始开发</p>
+                    <i class="fas fa-search feature-icon"></i>
+                    <h3>项目搜索</h3>
+                    <p>支持本地项目和 GitLab 项目的快速搜索，轻松定位所需项目</p>
                 </div>
                 <div class="feature-card">
-                    <i class="fas fa-box feature-icon"></i>
-                    <h3>依赖管理</h3>
-                    <p>智能管理项目依赖，自动处理版本冲突</p>
+                    <i class="fas fa-folder-open feature-icon"></i>
+                    <h3>项目打开</h3>
+                    <p>快速搜索并打开本地项目，提高开发效率</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-terminal feature-icon"></i>
+                    <h3>脚本执行</h3>
+                    <p>交互式运行项目内的 npm 脚本，支持客户端和服务端项目的特殊标记</p>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-code-branch feature-icon"></i>
-                    <h3>Git 操作自动化</h3>
-                    <p>简化 Git 工作流程，提高团队协作效率</p>
+                    <h3>分支管理</h3>
+                    <p>为分支添加注释，方便追踪和查找，提升团队协作效率</p>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-cogs feature-icon"></i>
                     <h3>配置管理</h3>
-                    <p>灵活的项目配置管理，支持多环境部署</p>
+                    <p>灵活的配置选项，支持本地项目路径和 GitLab 集成设置</p>
                 </div>
             </div>
         </div>
@@ -79,26 +84,61 @@
             <h2 class="section-title">使用方法</h2>
             <div class="command-grid">
                 <div class="command-card">
-                    <h3 class="command-name">pm init</h3>
-                    <p>初始化新项目</p>
+                    <h3 class="command-name">项目打开</h3>
+                    <p>快速打开本地项目</p>
                     <div class="code-block">
-                        <code>pm init my-project</code>
+                        <code>pm open</code>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <div class="code-block">
+                        <code>pm open project-name</code>
                         <button class="copy-btn">Copy</button>
                     </div>
                 </div>
                 <div class="command-card">
-                    <h3 class="command-name">pm config</h3>
-                    <p>管理项目配置</p>
+                    <h3 class="command-name">项目搜索</h3>
+                    <p>搜索本地或 GitLab 项目</p>
                     <div class="code-block">
-                        <code>pm config set key value</code>
+                        <code>pm search keyword</code>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <div class="code-block">
+                        <code>pm search keyword -g</code>
                         <button class="copy-btn">Copy</button>
                     </div>
                 </div>
                 <div class="command-card">
-                    <h3 class="command-name">pm git</h3>
-                    <p>Git 操作助手</p>
+                    <h3 class="command-name">脚本运行</h3>
+                    <p>交互式运行项目脚本</p>
                     <div class="code-block">
-                        <code>pm git sync</code>
+                        <code>pm run</code>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                </div>
+                <div class="command-card">
+                    <h3 class="command-name">分支管理</h3>
+                    <p>管理分支注释</p>
+                    <div class="code-block">
+                        <code>pm br set "分支说明"</code>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <div class="code-block">
+                        <code>pm br list</code>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                </div>
+                <div class="command-card">
+                    <h3 class="command-name">配置管理</h3>
+                    <p>查看和设置配置</p>
+                    <div class="code-block">
+                        <code>pm config get</code>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <div class="code-block">
+                        <code>pm config set local-project-root-directory "/path/to/projects"</code>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                </div>
                         <button class="copy-btn">Copy</button>
                     </div>
                 </div>
