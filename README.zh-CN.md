@@ -1,13 +1,14 @@
 # Project Mate CLI
 
-[English](./README.md) | 简体中文
+[官网](https://fsdtking.github.io/project-mate-cli/) | [English](./README.md) | 简体中文
 
 一个强大的项目管理命令行工具，旨在简化项目开发和管理流程。
 
 ## 功能特点
 
-- 🚀 快速项目初始化
-- 📦 统一的项目管理
+- 🚀 快速项目启动（目前仅支持npm脚本指令）
+- 📦 统一的项目管理（可模糊查询全部项目、文本，并通过默认编辑器打开）
+- 🚄 友好的git分支管理助手（对分支进行备注管理，并可通过模糊词全局查找相似分支）
 - 🔧 便捷的命令行工具
 - 🌈 跨平台支持
 
@@ -33,9 +34,11 @@ pm <command> [options]
 
 ### 常用命令
 
-- `pm init` - 初始化新项目
-- `pm start` - 启动项目
-- `pm build` - 构建项目
+- `pm search` - 全局多线程模糊查找，避开dist、node_modules等目录，支持远程搜索gitlab、github仓库，详细用法请查看`pm search --help`
+- `pm open` - 通过默认编辑器打开项目
+- `pm br` - 分支管理，支持对各分支进行备注管理，同时支持全局模糊搜索分支或分支备注，详细用法请查看`pm br --help`
+- `pm run` - 通过默认脚本执行器执行项目脚本，详细用法请查看`pm run --help`
+- `pm config` - 配置项目，详细用法请查看`pm config --help`
 
 更多命令和选项请运行：
 
